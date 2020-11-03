@@ -1,0 +1,96 @@
+service: Fidel-Offers
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: eu-west-1
+  endpointType: regional
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+
+functions:
+  offer-create:
+    handler: handlers/offer-handler.create
+    events:
+      - http:
+          path: offer
+          method: post
+  location-link:
+    handler: handlers/offer-handler.link
+    events:
+      - http:
+          path: offer/{offer_id}/location/{location_id}
+          method: post
+  location-create:
+    handler: handlers/location-handler.create
+    events:
+      - http:
+          path: location
+          method: post
+
+
+resources:
+  Resources:
+    myDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: '1'
+          WriteCapacityUnits: '1'
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        GlobalSecondaryIndexes:
+          - IndexName: SK-PK-GSI
+            KeySchema:
+            - AttributeName: SK
+              KeyType: HASH
+            - AttributeName: PK
+              KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: '1'
+              WriteCapacityUnits: '1'
+
+custom:
+  dynamodb:
+    stages:
+      - local
+      - test
+    start:
+      port: 8000
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+      convertEmptyValues: true
+  serverless-mocha-plugin:
+    preTestCommands:
+      - sh ./scripts/startOffline.sh
+    postTestCommands:
+      - sh ./scripts/stopOffline.sh
+
+plugins:
+  - serverless-offline
+  - serverless-dynamodb-local
+  - serverless-mocha-plugin
