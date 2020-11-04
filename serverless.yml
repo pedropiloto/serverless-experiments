@@ -1,0 +1,136 @@
+service: Fidel-Offers
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: eu-west-1
+  endpointType: regional
+  environment:
+    DYNAMODB_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+      Resource: "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.DYNAMODB_TABLE}"
+    - Effect: "Allow"
+      Action:
+        - "sqs:SendMessage"
+        - "sqs:GetQueueUrl"
+      Resource: "arn:aws:sqs:${self:provider.region}:493794923732:MyQueue"
+    - Effect: "Allow"
+      Action:
+        - "sqs:ListQueues"
+      Resource: "arn:aws:sqs:${self:provider.region}:493794923732:*"
+
+functions:
+  offer-create:
+    handler: src/handlers/offer-handler.create
+    events:
+      - http:
+          path: offer
+          method: post
+  location-link:
+    handler: src/handlers/offer-handler.link
+    events:
+      - http:
+          path: offer/{offer_id}/location/{location_id}
+          method: post
+  location-link-bulk:
+    handler: src/handlers/offer-handler.bulk_link_init
+    events:
+      - http:
+          path: offer/{offer_id}/actions/bulk_link/brand/{brand_id}
+          method: post
+  location-create:
+    handler: src/handlers/location-handler.create
+    events:
+      - http:
+          path: location
+          method: post
+
+  location-link-bulk-process:
+    handler: src/handlers/sqs-job-processor.handler
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - MyQueue
+              - Arn
+
+resources:
+  Resources:
+    myDynamoDBTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: BrandId
+          AttributeType: S
+        KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: '1'
+          WriteCapacityUnits: '1'
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
+        GlobalSecondaryIndexes:
+          - IndexName: SK-PK-GSI
+            KeySchema:
+            - AttributeName: SK
+              KeyType: HASH
+            - AttributeName: PK
+              KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: '1'
+              WriteCapacityUnits: '1'
+          - IndexName: BrandId-SK-GSI
+            KeySchema:
+            - AttributeName: BrandId
+              KeyType: HASH
+            - AttributeName: SK
+              KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: '1'
+              WriteCapacityUnits: '1'
+    MyQueue:
+      Type: "AWS::SQS::Queue"
+      Properties:
+        QueueName: "MyQueue"
+
+custom:
+  dynamodb:
+    stages:
+      - local
+      - test
+    start:
+      port: 8000
+      inMemory: true
+      heapInitial: 200m
+      heapMax: 1g
+      migrate: true
+      convertEmptyValues: true
+  serverless-mocha-plugin:
+    preTestCommands:
+      - sh ./scripts/startOffline.sh
+    postTestCommands:
+      - sh ./scripts/stopOffline.sh
+
+plugins:
+  - serverless-offline
+  - serverless-dynamodb-local
+  - serverless-mocha-plugin
