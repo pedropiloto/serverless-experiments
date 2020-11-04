@@ -1,5 +1,5 @@
 const request = require('supertest');
-const dynamodbHelper = require('../../utils/dynamodb-helper');
+const dynamodbHelper = require('../../src/utils/dynamodb-helper');
 
 describe('Offer Handler', () => {
   const initialOfferId = '01';

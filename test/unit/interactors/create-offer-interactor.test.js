@@ -1,8 +1,8 @@
-const OfferRepository = require('../../../repositories/offer-repository');
-const CreateOfferInteractor = require('../../../interactors/create-offer-interactor');
-const BadRequestError = require('../../../errors/bad-request-error');
+const OfferRepository = require('../../../src/repositories/offer-repository');
+const CreateOfferInteractor = require('../../../src/interactors/create-offer-interactor');
+const BadRequestError = require('../../../src/errors/bad-request-error');
 
-jest.mock('../../../repositories/offer-repository');
+jest.mock('../../../src/repositories/offer-repository');
 
 describe('Create Offer Interactor', () => {
   afterEach(() => {

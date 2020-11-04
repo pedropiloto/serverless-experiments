@@ -1,6 +1,6 @@
 const uuid = require('uuid');
 
-class Offer {
+class Location {
   constructor(params) {
     this.id = params.id ? params.id : uuid.v1();
     this.hasOffer = params.hasOffer ? params.hasOffer : false;
@@ -9,4 +9,4 @@ class Offer {
   }
 }
 
-module.exports = Offer;
+module.exports = Location;

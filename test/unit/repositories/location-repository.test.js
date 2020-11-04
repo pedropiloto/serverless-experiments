@@ -1,8 +1,8 @@
-const Location = require('../../../models/location');
-const dynamodbHelper = require('../../../utils/dynamodb-helper');
-const myModule = require('../../../repositories/location-repository');
+const Location = require('../../../src/models/location');
+const dynamodbHelper = require('../../../src/utils/dynamodb-helper');
+const myModule = require('../../../src/repositories/location-repository');
 
-jest.mock('../../../utils/dynamodb-helper');
+jest.mock('../../../src/utils/dynamodb-helper');
 
 describe('Location Repository', () => {
   afterEach(() => {

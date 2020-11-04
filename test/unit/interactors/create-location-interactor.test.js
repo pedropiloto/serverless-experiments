@@ -1,8 +1,8 @@
-const LocationRepository = require('../../../repositories/location-repository');
-const CreateLocationInteractor = require('../../../interactors/create-location-interactor');
-const BadRequestError = require('../../../errors/bad-request-error');
+const LocationRepository = require('../../../src/repositories/location-repository');
+const CreateLocationInteractor = require('../../../src/interactors/create-location-interactor');
+const BadRequestError = require('../../../src/errors/bad-request-error');
 
-jest.mock('../../../repositories/location-repository');
+jest.mock('../../../src/repositories/location-repository');
 
 describe('Create Location Interactor', () => {
   afterEach(() => {

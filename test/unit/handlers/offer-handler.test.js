@@ -1,13 +1,14 @@
-const CreateOfferInteractor = require('../../../interactors/create-offer-interactor');
-const LinkLocationToOfferInteractor = require('../../../interactors/link-location-to-offer-interactor');
+const CreateOfferInteractor = require('../../../src/interactors/create-offer-interactor');
+const LinkLocationToOfferInteractor = require('../../../src/interactors/link-location-to-offer-interactor');
+const BulkLinkInitInteractor = require('../../../src/interactors/bulk-link-init-interactor');
+const OfferHandler = require('../../../src/handlers/offer-handler');
+const BadRequestError = require('../../../src/errors/bad-request-error');
+const { handleAPIError } = require('../../../src/utils/handle-error');
 
-const OfferHandler = require('../../../handlers/offer-handler');
-const BadRequestError = require('../../../errors/bad-request-error');
-const { handleAPIError } = require('../../../utils/handle-error');
-
-jest.mock('../../../interactors/create-offer-interactor');
-jest.mock('../../../interactors/link-location-to-offer-interactor');
-jest.mock('../../../utils/handle-error');
+jest.mock('../../../src/interactors/bulk-link-init-interactor');
+jest.mock('../../../src/interactors/create-offer-interactor');
+jest.mock('../../../src/interactors/link-location-to-offer-interactor');
+jest.mock('../../../src/utils/handle-error');
 
 describe('Offer Handler', () => {
   afterEach(() => {
@@ -57,7 +58,7 @@ describe('Offer Handler', () => {
           .mockImplementation(() => { throw new BadRequestError('Invalid Parameters'); });
       });
 
-      it('should return a successful response', async () => {
+      it('should call handle api error', async () => {
         await OfferHandler.create(event);
         expect(handleAPIError).toHaveBeenCalledTimes(1);
       });
@@ -108,8 +109,60 @@ describe('Offer Handler', () => {
           .mockImplementation(() => { throw new BadRequestError('Invalid Parameters'); });
       });
 
-      it('should return a successful response', async () => {
+      it('should call handle api error', async () => {
         await OfferHandler.link(event);
+        expect(handleAPIError).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe('given a request to init a bulk link', () => {
+    const event = {
+      pathParameters: {
+        brand_id: 'brand_01',
+        offer_id: 'offer_id',
+      },
+    };
+
+    it('should call the interactor with the payload received', async () => {
+      await OfferHandler.bulk_link_init(event);
+      expect(BulkLinkInitInteractor.call).toHaveBeenCalledTimes(1);
+      expect(BulkLinkInitInteractor.call).toHaveBeenCalledWith(expect.objectContaining(
+        {
+          brand_id: 'brand_01',
+          offer_id: 'offer_id',
+        },
+      ));
+    });
+
+    describe('when it succeeds to create the bulk jobr', () => {
+      const interactorResponse = {};
+      beforeEach(() => {
+        BulkLinkInitInteractor
+          .call
+          .mockImplementation(() => interactorResponse);
+      });
+
+      it('should return a successful response', async () => {
+        const response = await OfferHandler.bulk_link_init(event);
+        expect(response).toEqual({
+          statusCode: 201,
+          body: JSON.stringify(interactorResponse,
+            null,
+            2),
+        });
+      });
+    });
+
+    describe('when it does not succeed to create the bulk job', () => {
+      beforeEach(() => {
+        BulkLinkInitInteractor
+          .call
+          .mockImplementation(() => { throw new BadRequestError('Invalid Parameters'); });
+      });
+
+      it('should call handle api error', async () => {
+        await OfferHandler.bulk_link_init(event);
         expect(handleAPIError).toHaveBeenCalledTimes(1);
       });
     });

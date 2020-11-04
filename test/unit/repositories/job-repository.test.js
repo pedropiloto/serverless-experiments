@@ -1,10 +1,12 @@
-const Offer = require('../../../src/models/offer');
+const Job = require('../../../src/models/job');
+const { JobStatus } = require('../../../src/models/job');
+
 const dynamodbHelper = require('../../../src/utils/dynamodb-helper');
-const myModule = require('../../../src/repositories/offer-repository');
+const JobRepository = require('../../../src/repositories/job-repository');
 
 jest.mock('../../../src/utils/dynamodb-helper');
 
-describe('Offer Repository', () => {
+describe('Job Repository', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -17,20 +19,16 @@ describe('Offer Repository', () => {
     });
 
     it('should call the put function to dynamodb with the item', () => {
-      myModule.save(new Offer({
-        id: 'offer_id',
-        name: 'offer_name',
-        toalLocations: 0,
-        brandId: 'brand_01',
+      JobRepository.save(new Job({
+        id: 'job_id',
+        status: 'CREATED',
       }));
       expect(dynamodbClientPutFunction).toHaveBeenCalledTimes(1);
       expect(dynamodbClientPutFunction).toHaveBeenCalledWith({
         Item: {
-          PK: 'OFFER#offer_id',
-          SK: 'OFFER#offer_id',
-          Name: 'offer_name',
-          TotalLocations: 0,
-          BrandId: 'brand_01',
+          PK: 'JOB#job_id',
+          SK: 'JOB#job_id',
+          JobStatus: 'CREATED',
         },
         TableName: undefined,
       });
@@ -46,17 +44,17 @@ describe('Offer Repository', () => {
     });
 
     it('should call the put function to dynamodb with the item', () => {
-      myModule.incrementOffer('offer_id');
+      JobRepository.updateStatus('job_id', JobStatus.COMPLETED);
       expect(dynamodbClientUpdateFunction).toHaveBeenCalledTimes(1);
       expect(dynamodbClientUpdateFunction).toHaveBeenCalledWith({
         TableName: process.env.DYNAMODB_TABLE,
         Key: {
-          PK: 'OFFER#offer_id',
-          SK: 'OFFER#offer_id',
+          PK: 'JOB#job_id',
+          SK: 'JOB#job_id',
         },
-        UpdateExpression: 'ADD TotalLocations :inc',
+        UpdateExpression: 'SET JobStatus = :JobStatus',
         ExpressionAttributeValues: {
-          ':inc': 1,
+          ':JobStatus': JobStatus.COMPLETED,
         },
       });
     });

@@ -1,11 +1,11 @@
-const LocationRepository = require('../../../repositories/location-repository');
-const OfferRepository = require('../../../repositories/offer-repository');
-const LinkLocationToOfferInteractor = require('../../../interactors/link-location-to-offer-interactor');
+const LocationRepository = require('../../../src/repositories/location-repository');
+const OfferRepository = require('../../../src/repositories/offer-repository');
+const LinkLocationToOfferInteractor = require('../../../src/interactors/link-location-to-offer-interactor');
 
-const BadRequestError = require('../../../errors/bad-request-error');
+const BadRequestError = require('../../../src/errors/bad-request-error');
 
-jest.mock('../../../repositories/offer-repository');
-jest.mock('../../../repositories/location-repository');
+jest.mock('../../../src/repositories/offer-repository');
+jest.mock('../../../src/repositories/location-repository');
 
 describe('Link Location To Offer Interactor', () => {
   afterEach(() => {

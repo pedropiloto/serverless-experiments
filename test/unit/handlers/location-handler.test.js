@@ -1,10 +1,10 @@
-const CreateLocationInteractor = require('../../../interactors/create-location-interactor');
-const LocationHandler = require('../../../handlers/location-handler');
-const BadRequestError = require('../../../errors/bad-request-error');
-const { handleAPIError } = require('../../../utils/handle-error');
+const CreateLocationInteractor = require('../../../src/interactors/create-location-interactor');
+const LocationHandler = require('../../../src/handlers/location-handler');
+const BadRequestError = require('../../../src/errors/bad-request-error');
+const { handleAPIError } = require('../../../src/utils/handle-error');
 
-jest.mock('../../../interactors/create-location-interactor');
-jest.mock('../../../utils/handle-error');
+jest.mock('../../../src/interactors/create-location-interactor');
+jest.mock('../../../src/utils/handle-error');
 
 describe('Location Handler', () => {
   afterEach(() => {
