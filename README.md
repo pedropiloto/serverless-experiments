@@ -94,7 +94,7 @@ The solution was implemented, as suggested, using teh serverless Framework.
 
 ### Part I and Part II
 
-![DynamoDB Modelling part I and part II](https://raw.githubusercontent.com/FidelLimited/be-techtest-pedropiloto/improve-documentation/documentation/model.png?token=ADAT4OU7XWAMM4WSJ4SBDTK7VNHGS)
+![DynamoDB Modelling part I and part II](https://raw.githubusercontent.com/FidelLimited/be-techtest-pedropiloto/master/documentation/model.png?token=ADAT4OQFQA76QTSOCJZ4BYS7WUQOQ)
 
 #### DynamoDB Model
 
@@ -115,7 +115,7 @@ Some considerations:
 
 This part was not totally completed, since the core functionality was not implemented, only the mechanism of creating and processing asynchronous jobs so the client does not have to wait synchronously for the response.
 
-![Part II Sequence Diagram](https://raw.githubusercontent.com/FidelLimited/be-techtest-pedropiloto/improve-documentation/documentation/part_3_sd.png?token=ADAT4OQO3AOCMWXRJSATG2S7VNHIC)
+![Part II Sequence Diagram](https://raw.githubusercontent.com/FidelLimited/be-techtest-pedropiloto/master/documentation/part_3_sd.png?token=ADAT4OSRUTIESTPOMMOWPV27WUQPQ)
 
 #### Endpoints
 - POST /offer/<offer_id>/actions/bulk_link/brand/<brand_id>
